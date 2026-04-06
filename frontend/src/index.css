@@ -1,0 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Colors */
+  --bg-main: #f4f7fb;
+  --bg-card: #ffffff;
+  
+  --primary: #38bdf8;
+  --primary-hover: #0ea5e9;
+  --primary-light: #e0f2fe;
+  --primary-gradient: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+  
+  --text-dark: #1e293b;
+  --text-muted: #94a3b8;
+  
+  --color-purple: #8b5cf6;
+  --color-purple-light: #ede9fe;
+  --color-mint: #14b8a6;
+  --color-mint-light: #ccfbf1;
+  --color-orange: #f97316;
+  --color-orange-light: #ffedd5;
+  --color-blue: #3b82f6;
+
+  --nav-bg: #ffffff;
+  --nav-active: #0ea5e9;
+  --nav-inactive: #cbd5e1;
+
+  --shadow-sm: 0 5px 20px -5px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 12px 30px -8px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.08);
+  --shadow-primary: 0 12px 24px -6px rgba(56, 189, 248, 0.35);
+  
+  --radius-md: 12px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-full: 9999px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-dark);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  font-family: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  outline: none;
+}
