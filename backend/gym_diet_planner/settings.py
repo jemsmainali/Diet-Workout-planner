@@ -67,9 +67,9 @@ WSGI_APPLICATION = 'gym_diet_planner.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME', 'gym_diet_planner'),
+        'NAME': os.environ.get('DB_NAME', 'GYM-Planner'),
         'USER': os.environ.get('DB_USER', 'postgres'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', 'password'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'jems12'),
         'HOST': os.environ.get('DB_HOST', 'localhost'),
         'PORT': os.environ.get('DB_PORT', '5432'),
     }
