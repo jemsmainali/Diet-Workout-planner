@@ -25,4 +25,6 @@ services:
         value: ".onrender.com"
       - key: FRONTEND_URL
         value: "https://your-vercel-app-url.vercel.app" # UPDATE THIS AFTER DEPLOYING FRONTEND
+      - key: DEBUG
+        value: "False"
     rootDir: "backend"
