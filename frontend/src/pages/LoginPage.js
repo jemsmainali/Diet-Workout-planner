@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import Tilt from 'react-parallax-tilt';
+import { ArrowRight, Flame, ShieldCheck, Zap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -26,62 +29,48 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={styles.page}>
-      <div style={styles.card}>
-        <div style={styles.header}>
-          <div style={styles.logo}><img src="/images/gym_logo.jfif" alt="GYMFIED" style={styles.brandIcon} /></div>
-          <h1 style={styles.title}>GYMFIED</h1>
-          <p style={styles.sub}>Your intelligent gym & diet companion</p>
+    <AuthShell>
+      <motion.div className="auth-copy" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}>
+        <p className="page-kicker">Premium fitness SaaS</p>
+        <h1 className="font-display neon-text">Train wild. Eat precise. Track everything.</h1>
+        <p>GYMFIED turns your intelligent training planner into a cinematic command center for workouts, diet, and body progress.</p>
+        <div className="auth-proof">
+          <span><Flame size={16} /> Adaptive plans</span>
+          <span><ShieldCheck size={16} /> Private data</span>
+          <span><Zap size={16} /> Fast rituals</span>
         </div>
+      </motion.div>
 
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <Input
-            label="Email address"
-            type="email"
-            placeholder="you@example.com"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-            required
-          />
-          <Input
-            label="Password"
-            type="password"
-            placeholder="••••••••"
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-            required
-          />
+      <Tilt glareEnable glareMaxOpacity={0.18} tiltMaxAngleX={7} tiltMaxAngleY={7}>
+        <motion.div className="auth-card premium-panel" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.12 }}>
+          <div className="auth-logo"><Zap size={24} fill="currentColor" /></div>
+          <h2 className="font-display">Member Login</h2>
+          <p>Enter the arena and keep your streak alive.</p>
 
-          {error && (
-            <div style={styles.error}>{error}</div>
-          )}
+          <form onSubmit={handleSubmit} className="auth-form">
+            <Input label="Email address" type="email" placeholder="you@email.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+            <Input label="Password" type="password" placeholder="••••••••" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
+            {error && <div className="auth-error">{error}</div>}
+            <Button type="submit" loading={loading} style={{ width: '100%', justifyContent: 'center', padding: '14px' }}>
+              {loading ? 'Signing in...' : <>Sign In <ArrowRight size={18} /></>}
+            </Button>
+          </form>
 
-          <Button type="submit" loading={loading} style={{ width: '100%', justifyContent: 'center', padding: '12px' }}>
-            {loading ? 'Signing in…' : 'Sign In'}
-          </Button>
-        </form>
-
-        <p style={styles.registerLink}>
-          Don't have an account?{' '}
-          <Link to="/register" style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 600 }}>
-            Create one free
-          </Link>
-        </p>
-      </div>
-    </div>
+          <p className="auth-link">
+            New here? <Link to="/register">Create your account</Link>
+          </p>
+        </motion.div>
+      </Tilt>
+    </AuthShell>
   );
 }
 
-const styles = {
-  page: { minHeight: '100vh', background: 'var(--bg-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' },
-  card: { background: 'var(--bg-card)', boxShadow: 'var(--shadow-lg)', borderRadius: 24, padding: '2.5rem', width: '100%', maxWidth: 420 },
-  header: { textAlign: 'center', marginBottom: '2rem' },
-  logo: { fontSize: 52, marginBottom: 12 },
-  title: { color: 'var(--text-dark)', fontSize: 28, fontWeight: 800, margin: '0 0 6px', letterSpacing: '-0.5px' },
-  sub: { color: 'var(--text-muted)', fontSize: 15, margin: 0 },
-  form: { display: 'flex', flexDirection: 'column', gap: 16, marginBottom: '1.5rem' },
-  error: { background: '#fee2e2', border: '1px solid #fecaca', color: '#ef4444', borderRadius: 10, padding: '10px 14px', fontSize: 14 },
-  features: { borderTop: '1px solid #f1f5f9', paddingTop: '1.5rem', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: 8 },
-  featureItem: { color: 'var(--text-muted)', fontSize: 14, fontWeight: 500 },
-  registerLink: { textAlign: 'center', color: 'var(--text-muted)', fontSize: 14, margin: 0 },
-};
+function AuthShell({ children }) {
+  return (
+    <main className="auth-shell">
+      <div className="athlete-orb" style={{ width: 320, height: 320, background: 'rgba(255,31,61,0.28)', left: '8%', top: '10%' }} />
+      <div className="athlete-orb" style={{ width: 240, height: 240, background: 'rgba(255,255,255,0.1)', right: '12%', bottom: '8%' }} />
+      {children}
+    </main>
+  );
+}

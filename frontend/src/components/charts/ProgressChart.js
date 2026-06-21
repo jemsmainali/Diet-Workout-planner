@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Area, AreaChart, Legend,
+  Tooltip, ResponsiveContainer, Area, AreaChart,
 } from 'recharts';
 import { formatDate } from '../../utils/helpers';
 
@@ -83,9 +83,9 @@ export function MacroDonut({ protein, carbs, fats }) {
   const cPct = Math.round((carbs * 4 / total) * 100);
   const fPct = 100 - pPct - cPct;
   const macros = [
-    { label: 'Protein', value: protein, pct: pPct, color: '#38bdf8', cals: protein * 4 },
-    { label: 'Carbs', value: carbs, pct: cPct, color: '#6366f1', cals: carbs * 4 },
-    { label: 'Fats', value: fats, pct: fPct, color: '#f59e0b', cals: fats * 9 },
+    { label: 'Protein', value: protein, pct: pPct, color: '#ef4444', cals: protein * 4 },
+    { label: 'Carbs', value: carbs, pct: cPct, color: '#f59e0b', cals: carbs * 4 },
+    { label: 'Fats', value: fats, pct: fPct, color: '#fb7185', cals: fats * 9 },
   ];
   return (
     <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>

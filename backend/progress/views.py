@@ -12,16 +12,25 @@ class ProgressListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return Progress.objects.none()
         return Progress.objects.filter(user=self.request.user)
 
 
+from rest_framework.exceptions import ValidationError
+from django.db import IntegrityError
+
 class ProgressAddView(generics.CreateAPIView):
-    """POST /api/progress/add/ - Log new progress entry."""
     serializer_class = ProgressSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        try:
+            serializer.save(user=self.request.user)
+        except IntegrityError:
+            raise ValidationError(
+                {"date": "You've already logged progress for this date. Edit the existing entry instead."}
+            )
 
 
 class ProgressDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -30,6 +39,8 @@ class ProgressDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return Progress.objects.none()
         return Progress.objects.filter(user=self.request.user)
 
 

@@ -3,9 +3,41 @@ import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../services/api';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
-import Input, { Select } from '../components/ui/Input';
+import Input from '../components/ui/Input';
+import Select from '../components/ui/Select';
 import Badge from '../components/ui/Badge';
-import { getBMIColor, getGoalLabel, getGoalColor } from '../utils/helpers';
+import { getBMIColor, getGoalLabel } from '../utils/helpers';
+import { Dumbbell, Flame, Scale } from 'lucide-react';
+
+const GENDER_OPTIONS = [
+  { value: 'male', label: 'Male' },
+  { value: 'female', label: 'Female' },
+];
+
+const PROFILE_GENDER_OPTIONS = [
+  ...GENDER_OPTIONS,
+  { value: 'other', label: 'Other' },
+];
+
+const ACTIVITY_OPTIONS = [
+  { value: 'sedentary', label: 'Sedentary' },
+  { value: 'light', label: 'Lightly Active' },
+  { value: 'moderate', label: 'Moderately Active' },
+  { value: 'very_active', label: 'Very Active' },
+  { value: 'extra_active', label: 'Extra Active' },
+];
+
+const GOAL_OPTIONS = [
+  { value: 'fat_loss', label: 'Fat Loss' },
+  { value: 'muscle_gain', label: 'Muscle Gain' },
+  { value: 'maintain', label: 'Maintain' },
+];
+
+const GOAL_ICON_META = {
+  fat_loss: { Icon: Flame, color: '#ef4444' },
+  muscle_gain: { Icon: Dumbbell, color: '#3b82f6' },
+  maintain: { Icon: Scale, color: '#10b981' },
+};
 
 export default function ProfilePage() {
   const { user, updateUser } = useAuth();
@@ -58,7 +90,6 @@ export default function ProfilePage() {
   };
 
   const bmiColor = getBMIColor(user?.bmi);
-  const goalColor = getGoalColor(user?.fitness_goal);
 
   return (
     <div style={styles.page}>
@@ -113,23 +144,10 @@ export default function ProfilePage() {
                   value={bmiForm.height} onChange={(e) => setBmiForm({ ...bmiForm, height: e.target.value })} required />
                 <Input label="Age" type="number" placeholder="25"
                   value={bmiForm.age} onChange={(e) => setBmiForm({ ...bmiForm, age: e.target.value })} />
-                <Select label="Gender" value={bmiForm.gender} onChange={(e) => setBmiForm({ ...bmiForm, gender: e.target.value })}>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                </Select>
+                <Select label="Gender" value={bmiForm.gender} onChange={(e) => setBmiForm({ ...bmiForm, gender: e.target.value })} options={GENDER_OPTIONS} />
               </div>
-              <Select label="Activity Level" value={bmiForm.activity_level} onChange={(e) => setBmiForm({ ...bmiForm, activity_level: e.target.value })}>
-                <option value="sedentary">Sedentary</option>
-                <option value="light">Lightly Active</option>
-                <option value="moderate">Moderately Active</option>
-                <option value="very_active">Very Active</option>
-                <option value="extra_active">Extra Active</option>
-              </Select>
-              <Select label="Goal" value={bmiForm.fitness_goal} onChange={(e) => setBmiForm({ ...bmiForm, fitness_goal: e.target.value })}>
-                <option value="fat_loss">Fat Loss</option>
-                <option value="muscle_gain">Muscle Gain</option>
-                <option value="maintain">Maintain</option>
-              </Select>
+              <Select label="Activity Level" value={bmiForm.activity_level} onChange={(e) => setBmiForm({ ...bmiForm, activity_level: e.target.value })} options={ACTIVITY_OPTIONS} />
+              <Select label="Goal" value={bmiForm.fitness_goal} onChange={(e) => setBmiForm({ ...bmiForm, fitness_goal: e.target.value })} options={GOAL_OPTIONS} />
               <Button type="submit" loading={bmiLoading}>Calculate</Button>
             </form>
 
@@ -176,29 +194,15 @@ export default function ProfilePage() {
               <Input label="Height (cm)" type="number" value={form.height} onChange={(e) => setForm({ ...form, height: e.target.value })} disabled={!editing} />
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <Select label="Gender" value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value })} disabled={!editing}>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-              </Select>
-              <Select label="Activity Level" value={form.activity_level} onChange={(e) => setForm({ ...form, activity_level: e.target.value })} disabled={!editing}>
-                <option value="sedentary">Sedentary</option>
-                <option value="light">Lightly Active</option>
-                <option value="moderate">Moderately Active</option>
-                <option value="very_active">Very Active</option>
-                <option value="extra_active">Extra Active</option>
-              </Select>
+              <Select label="Gender" value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value })} disabled={!editing} options={PROFILE_GENDER_OPTIONS} />
+              <Select label="Activity Level" value={form.activity_level} onChange={(e) => setForm({ ...form, activity_level: e.target.value })} disabled={!editing} options={ACTIVITY_OPTIONS} />
             </div>
-            <Select label="Fitness Goal" value={form.fitness_goal} onChange={(e) => setForm({ ...form, fitness_goal: e.target.value })} disabled={!editing}>
-              <option value="fat_loss">🔥 Fat Loss</option>
-              <option value="muscle_gain">💪 Muscle Gain</option>
-              <option value="maintain">⚖️ Maintain</option>
-            </Select>
+            <Select label="Fitness Goal" value={form.fitness_goal} onChange={(e) => setForm({ ...form, fitness_goal: e.target.value })} disabled={!editing} options={GOAL_OPTIONS} />
             <div>
               <label style={{ color: '#94a3b8', fontSize: 13, fontWeight: 500, display: 'block', marginBottom: 6 }}>Bio</label>
               <textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} disabled={!editing}
                 placeholder="Tell us about your fitness journey…" rows={3}
-                style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 10, padding: '10px 14px', color: 'var(--text-dark)', fontSize: 14, width: '100%', boxSizing: 'border-box', resize: 'vertical', fontFamily: 'inherit' }} />
+                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid var(--glass-border)', borderRadius: 14, padding: '10px 14px', color: 'var(--text-dark)', fontSize: 14, width: '100%', boxSizing: 'border-box', resize: 'vertical', fontFamily: 'inherit' }} />
             </div>
 
             {editing && (
@@ -212,9 +216,9 @@ export default function ProfilePage() {
           {/* Goal description */}
           <div style={{ marginTop: '1.5rem', borderTop: '1px solid #ffffffff', paddingTop: '1.5rem' }}>
             <h4 style={{ color: '#94a3b8', fontSize: 13, fontWeight: 600, margin: '0 0 10px' }}>YOUR PLAN STRATEGY</h4>
-            {user?.fitness_goal === 'fat_loss' && <PlanDesc icon="🔥" title="Fat Loss Protocol" points={['HIIT + Full Body circuits 5-6 days/week','500 kcal daily deficit for ~0.5kg/week loss','High protein to preserve muscle mass','Cardio-focused training sessions']} />}
-            {user?.fitness_goal === 'muscle_gain' && <PlanDesc icon="💪" title="Muscle Gain Protocol" points={['Push/Pull/Legs split 6 days/week','300 kcal daily surplus for lean gains','Progressive overload with heavy compounds','4×8 rep ranges for hypertrophy']} />}
-            {user?.fitness_goal === 'maintain' && <PlanDesc icon="⚖️" title="Maintenance Protocol" points={['Balanced upper/lower split 5 days/week','Maintenance calorie intake (TDEE)','Mix of strength and cardio work','3×12 rep ranges for general fitness']} />}
+            {user?.fitness_goal === 'fat_loss' && <PlanDesc goal="fat_loss" title="Fat Loss Protocol" points={['HIIT + Full Body circuits 5-6 days/week','500 kcal daily deficit for ~0.5kg/week loss','High protein to preserve muscle mass','Cardio-focused training sessions']} />}
+            {user?.fitness_goal === 'muscle_gain' && <PlanDesc goal="muscle_gain" title="Muscle Gain Protocol" points={['Push/Pull/Legs split 6 days/week','300 kcal daily surplus for lean gains','Progressive overload with heavy compounds','4×8 rep ranges for hypertrophy']} />}
+            {user?.fitness_goal === 'maintain' && <PlanDesc goal="maintain" title="Maintenance Protocol" points={['Balanced upper/lower split 5 days/week','Maintenance calorie intake (TDEE)','Mix of strength and cardio work','3×12 rep ranges for general fitness']} />}
           </div>
         </Card>
       </div>
@@ -222,10 +226,15 @@ export default function ProfilePage() {
   );
 }
 
-function PlanDesc({ icon, title, points }) {
+function PlanDesc({ goal, title, points }) {
+  const { Icon, color } = GOAL_ICON_META[goal] || GOAL_ICON_META.maintain;
+
   return (
-    <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: '14px 16px', boxShadow: 'var(--shadow-sm)' }}>
-      <div style={{ color: 'var(--text-dark)', fontWeight: 700, marginBottom: 10 }}>{icon} {title}</div>
+    <div style={{ background: 'var(--bg-card)', border: '1px solid var(--glass-border)', borderRadius: 18, padding: '14px 16px', boxShadow: 'var(--shadow-sm)', backdropFilter: 'blur(18px)' }}>
+      <div style={{ color: 'var(--text-dark)', fontWeight: 700, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+        <Icon size={18} color={color} />
+        {title}
+      </div>
       {points.map((p) => (
         <div key={p} style={{ color: '#64748b', fontSize: 13, marginBottom: 6, display: 'flex', gap: 8 }}>
           <span style={{ color: '#38bdf8' }}>→</span>{p}
@@ -236,8 +245,8 @@ function PlanDesc({ icon, title, points }) {
 }
 
 const styles = {
-  page: { maxWidth: 1400, margin: '0 auto', padding: '2rem 1.5rem' },
-  title: { color: 'var(--text-dark)', fontSize: 26, fontWeight: 800, margin: '0 0 1.5rem' },
+  page: { maxWidth: 1400, margin: '0 auto', padding: '0' },
+  title: { color: 'var(--text-dark)', fontSize: 46, fontFamily: "'Bebas Neue', Impact, sans-serif", letterSpacing: '0.04em', fontWeight: 400, margin: '0 0 1.5rem' },
   success: { background: '#ecfdf5', border: '1px solid #10b981', color: '#047857', borderRadius: 12, padding: '12px 16px', marginBottom: '1.5rem', fontSize: 14 },
   errorBox: { background: '#fef2f2', border: '1px solid #ef4444', color: '#b91c1c', borderRadius: 12, padding: '12px 16px', marginBottom: '1.5rem', fontSize: 14 },
   grid: { display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 20, alignItems: 'start' },
@@ -245,10 +254,10 @@ const styles = {
   avatar: { width: 72, height: 72, borderRadius: '50%', background: 'var(--primary-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 28, flexShrink: 0 },
   name: { color: 'var(--text-dark)', fontSize: 22, fontWeight: 800, margin: '0 0 4px' },
   email: { color: 'var(--text-muted)', fontSize: 14, margin: '0 0 8px' },
-  bio: { color: 'var(--text-muted)', fontSize: 14, fontStyle: 'italic', borderTop: '1px solid #e2e8f0', paddingTop: '1rem', marginTop: '0.5rem' },
+  bio: { color: 'var(--text-muted)', fontSize: 14, fontStyle: 'italic', borderTop: '1px solid var(--glass-border)', paddingTop: '1rem', marginTop: '0.5rem' },
   metricsGrid: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 },
-  metricBox: { background: '#f8fafc', borderRadius: 12, padding: '12px', textAlign: 'center', border: '1px solid #e2e8f0' },
+  metricBox: { background: 'rgba(255,255,255,0.055)', borderRadius: 16, padding: '12px', textAlign: 'center', border: '1px solid var(--glass-border)' },
   cardTitle: { color: 'var(--text-dark)', fontSize: 17, fontWeight: 700, margin: '0 0 16px' },
-  bmiResult: { marginTop: '1rem', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: '16px' },
+  bmiResult: { marginTop: '1rem', background: 'rgba(255,255,255,0.055)', border: '1px solid var(--glass-border)', borderRadius: 16, padding: '16px' },
   bmiRow: { display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: 16 },
 };

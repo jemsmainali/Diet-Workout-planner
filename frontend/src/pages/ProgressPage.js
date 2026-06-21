@@ -6,8 +6,10 @@ import Card from '../components/ui/Card';
 import Modal from '../components/ui/Modal';
 import Input from '../components/ui/Input';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import EmptyState from '../components/ui/EmptyState';
 import { WeightChart, BodyFatChart } from '../components/charts/ProgressChart';
 import { formatDate, getBMIColor } from '../utils/helpers';
+import { Activity, Flame, LineChart, Scale } from 'lucide-react';
 
 export default function ProgressPage() {
   const { user } = useAuth();
@@ -78,25 +80,20 @@ export default function ProgressPage() {
         <Button onClick={() => setShowModal(true)}>+ Log Progress</Button>
       </div>
 
-      {/* Stats row */}
-      {report && report.entries_count > 0 && (
-        <div style={styles.statsRow}>
-          {[
-            { label: 'Starting Weight', value: `${report.start_weight} kg`, icon: '🏁' },
-            { label: 'Current Weight', value: `${report.current_weight} kg`, icon: '⚖️' },
-            { label: 'Total Change', value: `${report.weight_change > 0 ? '+' : ''}${report.weight_change} kg`, icon: report.weight_change < 0 ? '📉' : '📈', color: report.weight_change < 0 ? '#10b981' : '#ef4444' },
-            { label: 'Current BMI', value: latest?.bmi || '—', icon: '📊', color: bmiColor },
-            { label: 'Avg Weight', value: `${report.avg_weight} kg`, icon: '📐' },
-            { label: 'Entries', value: report.entries_count, icon: '📋' },
-          ].map(({ label, value, icon, color }) => (
-            <div key={label} style={styles.statBox}>
-              <div style={{ fontSize: 22 }}>{icon}</div>
-              <div style={{ color: color || 'var(--primary)', fontSize: 20, fontWeight: 700 }}>{value}</div>
-              <div style={{ color: 'var(--text-muted)', fontSize: 12 }}>{label}</div>
-            </div>
-          ))}
-        </div>
-      )}
+      <div style={styles.placeholderStats}>
+        {[
+          { label: 'Current Weight', value: latest?.weight ? `${latest.weight} kg` : '—', sub: 'Latest log', icon: <Scale size={24} />, color: '#f59e0b' },
+          { label: 'BMI', value: latest?.bmi || user?.bmi || '—', sub: latest?.bmi ? 'Current' : 'No data yet', icon: <Activity size={24} />, color: bmiColor },
+          { label: 'Streak', value: report?.entries_count ? `${report.entries_count}` : '—', sub: 'Check-ins', icon: <Flame size={24} />, color: 'var(--primary)' },
+        ].map(({ label, value, sub, icon, color }) => (
+          <div key={label} style={styles.metricBox}>
+            <div style={{ color, marginBottom: 8 }}>{icon}</div>
+            <div style={{ color, fontSize: 20, fontWeight: 800 }}>{value}</div>
+            <div style={{ color: 'var(--text-dark)', fontSize: 12, fontWeight: 600 }}>{label}</div>
+            <div style={{ color: 'var(--text-muted)', fontSize: 11 }}>{sub}</div>
+          </div>
+        ))}
+      </div>
 
       {/* Charts */}
       {chartData.length > 1 && (
@@ -115,10 +112,11 @@ export default function ProgressPage() {
       {/* Entry history */}
       <h2 style={styles.sectionTitle}>History</h2>
       {!entries.length ? (
-        <div style={styles.empty}>
-          <p style={{ color: 'var(--text-muted)', fontSize: 16, marginTop: 12 }}>No progress logged yet.</p>
-          <Button onClick={() => setShowModal(true)} style={{ marginTop: 16 }}>Log Your First Entry</Button>
-        </div>
+        <EmptyState
+          icon={<LineChart size={64} />}
+          title="No progress logged yet."
+          action={<Button onClick={() => setShowModal(true)}>Log Your First Entry</Button>}
+        />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {entries.map((entry) => (
@@ -142,6 +140,13 @@ export default function ProgressPage() {
           ))}
         </div>
       )}
+
+      <Card style={{ marginTop: '1.5rem', minHeight: 220 }}>
+        <h3 style={styles.chartTitle}>Progress Chart</h3>
+        <div style={styles.emptyChart}>
+          {chartData.length > 1 ? 'Chart data loaded above.' : 'Your chart will appear here after two progress entries.'}
+        </div>
+      </Card>
 
       {/* Log Progress Modal */}
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Log Progress Entry" width={560}>
@@ -186,16 +191,18 @@ function Stat({ label, value }) {
 }
 
 const styles = {
-  page: { maxWidth: 1400, margin: '0 auto', padding: '2rem 1.5rem' },
+  page: { maxWidth: 1400, margin: '0 auto', padding: '0' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', flexWrap: 'wrap', gap: 12 },
-  title: { color: 'var(--text-dark)', fontSize: 26, fontWeight: 800, margin: '0 0 4px' },
+  title: { color: 'var(--text-dark)', fontSize: 46, fontFamily: "'Bebas Neue', Impact, sans-serif", letterSpacing: '0.04em', fontWeight: 400, margin: '0 0 4px' },
   sub: { color: 'var(--text-muted)', fontSize: 15, margin: 0 },
   statsRow: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12, marginBottom: '1.5rem' },
-  statBox: { background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14, padding: '16px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center', boxShadow: 'var(--shadow-sm)' },
+  statBox: { background: 'var(--bg-card)', border: '1px solid var(--glass-border)', borderRadius: 18, padding: '16px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center', boxShadow: 'var(--shadow-sm)', backdropFilter: 'blur(18px)' },
+  placeholderStats: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10, marginBottom: '1.5rem' },
+  metricBox: { background: 'rgba(255,255,255,0.055)', borderRadius: 16, padding: '12px', textAlign: 'center', border: '1px solid var(--glass-border)' },
   chartTitle: { color: 'var(--text-dark)', fontSize: 15, fontWeight: 700, margin: '0 0 16px' },
   sectionTitle: { color: 'var(--text-dark)', fontSize: 18, fontWeight: 700, margin: '0 0 1rem' },
-  empty: { textAlign: 'center', padding: '4rem 2rem' },
-  entryRow: { background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', boxShadow: 'var(--shadow-sm)' },
+  emptyChart: { minHeight: 150, display: 'grid', placeItems: 'center', color: 'var(--text-muted)', border: '1px dashed var(--glass-border)', borderRadius: 18, background: 'rgba(255,255,255,0.035)' },
+  entryRow: { background: 'var(--bg-card)', border: '1px solid var(--glass-border)', borderRadius: 18, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', boxShadow: 'var(--shadow-sm)', backdropFilter: 'blur(18px)' },
   entryDate: { minWidth: 110 },
   entryStats: { display: 'flex', gap: 20, flexWrap: 'wrap', flex: 1 },
   deleteBtn: { background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontSize: 16, padding: 4 },

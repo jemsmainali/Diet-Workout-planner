@@ -28,6 +28,8 @@ class WorkoutPlanListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return WorkoutPlan.objects.none()
         return WorkoutPlan.objects.filter(user=self.request.user, is_active=True)
 
 
@@ -50,6 +52,8 @@ class WorkoutPlanDetailView(generics.RetrieveUpdateDestroyAPIView):
         return WorkoutPlanSerializer
 
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return WorkoutPlan.objects.none()
         return WorkoutPlan.objects.filter(user=self.request.user)
 
 

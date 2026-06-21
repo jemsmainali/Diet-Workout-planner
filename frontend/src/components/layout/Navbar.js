@@ -1,15 +1,15 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Activity, Dumbbell, Gauge, LogOut, Salad, User, Zap } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { 
-  HomeIcon, ChartBarIcon, FireIcon, UserIcon 
-} from '@heroicons/react/24/outline';
 
 const NAV_LINKS = [
-  { to: '/dashboard', label: 'Dashboard', Icon: HomeIcon },
-  { to: '/workouts', label: 'Workouts', Icon: FireIcon },
-  { to: '/progress', label: 'Progress', Icon: ChartBarIcon },
-  { to: '/profile', label: 'Profile', Icon: UserIcon },
+  { to: '/dashboard', label: 'Dashboard', Icon: Gauge },
+  { to: '/workouts', label: 'Workouts', Icon: Dumbbell },
+  { to: '/diet', label: 'Diet', Icon: Salad },
+  { to: '/progress', label: 'Progress', Icon: Activity },
+  { to: '/profile', label: 'Profile', Icon: User },
 ];
 
 export default function Navbar() {
@@ -17,65 +17,40 @@ export default function Navbar() {
   const location = useLocation();
 
   return (
-    <nav style={styles.nav}>
-      <div style={styles.inner}>
-        <div style={styles.left}>
-          <Link to="/dashboard" style={styles.brand}>
-            <img src="/images/gym_logo.jfif" alt="GYMFIED" style={styles.brandIcon} />
-            <span style={styles.brandText}>GYMFIED</span>
-          </Link>
-          <div style={styles.links}>
-            {NAV_LINKS.map(({ to, label, Icon }) => {
-              const isActive = location.pathname.startsWith(to);
-              return (
-                <Link key={to} to={to} style={{ ...styles.link, color: isActive ? 'var(--primary)' : 'var(--text-muted)' }}>
-                  <Icon style={{ width: 22, height: 22 }} />
-                  <span style={isActive ? styles.linkActiveText : {}}>{label}</span>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-        <div style={styles.right}>
-          <div style={styles.userBadge}>
-            <span style={styles.userAvatar}>{user?.username?.[0]?.toUpperCase() || 'U'}</span>
-            <span style={styles.userName}>{user?.username}</span>
-          </div>
-          <button onClick={logout} className="btn-outline">Sign Out</button>
+    <aside className="premium-sidebar">
+      <Link to="/dashboard" className="premium-brand">
+        <span className="brand-mark"><Zap size={22} fill="currentColor" /></span>
+        <span>
+          <span className="font-display brand-word">GYMFIED</span>
+          <small>Wild training OS</small>
+        </span>
+      </Link>
+
+      <nav className="premium-nav-links">
+        {NAV_LINKS.map(({ to, label, Icon }) => {
+          const isActive = location.pathname.startsWith(to);
+          return (
+            <Link key={to} to={to} className={`premium-nav-link ${isActive ? 'active' : ''}`}>
+              {isActive && <motion.span layoutId="activeNav" className="active-nav-glow" />}
+              <Icon size={20} />
+              <span>{label}</span>
+            </Link>
+          );
+        })}
+      </nav>
+
+      <div className="premium-user-card">
+        <div className="user-avatar">{user?.username?.[0]?.toUpperCase() || 'U'}</div>
+        <div>
+          <strong>{user?.username || 'Athlete'}</strong>
+          <span>Premium member</span>
         </div>
       </div>
-    </nav>
+
+      <button onClick={logout} className="premium-signout">
+        <LogOut size={18} />
+        <span>Sign Out</span>
+      </button>
+    </aside>
   );
 }
-
-const styles = {
-  nav: {
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    backdropFilter: 'blur(12px)',
-    WebkitBackdropFilter: 'blur(12px)',
-    borderBottom: '1px solid rgba(226, 232, 240, 0.6)',
-    position: 'sticky',
-    top: 0,
-    zIndex: 100,
-  },
-  inner: {
-    maxWidth: 1400,
-    margin: '0 auto',
-    padding: '0 48px',
-    height: 72,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  left: { display: 'flex', alignItems: 'center', gap: 48 },
-  brand: { display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' },
-  brandIcon: { width: 38, height: 38, objectFit: 'cover', borderRadius: '50%', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' },
-  brandText: { fontSize: 24, fontWeight: 700, color: 'var(--text-dark)', letterSpacing: '-0.5px' },
-  links: { display: 'flex', alignItems: 'center', gap: 32 },
-  link: { display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', fontWeight: 500, transition: 'color 0.2s', fontSize: 16 },
-  linkActiveText: { fontWeight: 700 },
-  right: { display: 'flex', alignItems: 'center', gap: 24 },
-  userBadge: { display: 'flex', alignItems: 'center', gap: 10 },
-  userAvatar: { width: 36, height: 36, borderRadius: '50%', background: 'var(--primary-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 600, fontSize: 16 },
-  userName: { color: 'var(--text-dark)', fontSize: 15, fontWeight: 600 },
-};

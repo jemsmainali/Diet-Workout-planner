@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
+import Tilt from 'react-parallax-tilt';
+import { ArrowRight, Beef, Dumbbell, Flame, HeartPulse, Trophy, Zap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { progressAPI, workoutAPI, dietAPI, plansAPI } from '../services/api';
+import { progressAPI, workoutAPI, dietAPI } from '../services/api';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { WeightChart } from '../components/charts/ProgressChart';
 
@@ -12,6 +15,10 @@ export default function DashboardPage() {
   const [workoutCount, setWorkoutCount] = useState(0);
   const [todaySummary, setTodaySummary] = useState(null);
   const [loading, setLoading] = useState(true);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const athleteX = useTransform(mouseX, [0, 1], [-22, 22]);
+  const athleteY = useTransform(mouseY, [0, 1], [-16, 16]);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -31,139 +38,174 @@ export default function DashboardPage() {
     fetchAll();
   }, []);
 
-  if (loading) return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
-      <LoadingSpinner text="Loading your dashboard…" />
-    </div>
-  );
+  const totals = todaySummary?.daily_total || {};
+  const stats = useMemo(() => ([
+    { title: 'Training Blocks', value: workoutCount, unit: '', icon: Dumbbell, color: '#ff1f3d', progress: Math.min(92, workoutCount * 14 || 36) },
+    { title: 'Fuel Burn', value: Math.round(totals.calories || 0), unit: 'kcal', icon: Flame, color: '#fb923c', progress: Math.min(100, ((totals.calories || 0) / (user?.daily_calories || 2200)) * 100) },
+    { title: 'Body Weight', value: report?.current_weight || user?.weight || 0, unit: 'kg', icon: HeartPulse, color: '#22c55e', progress: 68 },
+  ]), [report?.current_weight, totals.calories, user?.daily_calories, user?.weight, workoutCount]);
 
-  return (
-    <div>
-      {/* Hero Header */}
-      <div className="flex-row-between items-center" style={{ marginBottom: 32 }}>
-        <div>
-          <div className="text-muted" style={{ marginBottom: 4 }}>
-            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
-          </div>
-          <h1 className="heading-xl">Have a nice day, {user?.username}!</h1>
-        </div>
+  if (loading) {
+    return (
+      <div style={{ display: 'grid', placeItems: 'center', height: '70vh' }}>
+        <LoadingSpinner text="Loading your command center..." />
       </div>
-
-      <div style={styles.gridContainer}>
-        {/* LEFT COLUMN */}
-        <div className="flex-col gap-4">
-          
-          {/* Activity Cards */}
-          <section>
-            <h2 className="heading-lg" style={{ marginBottom: 16 }}>Activity Summary</h2>
-            <div style={styles.activityGrid}>
-               <ActivityCard title="Workouts" color="var(--color-purple)" lightBg="var(--color-purple-light)" value={workoutCount} />
-               <ActivityCard title="Calories" color="var(--color-mint)" lightBg="var(--color-mint-light)" value={todaySummary?.daily_total?.calories || 0} unit="kcal" />
-               <ActivityCard title="Weight" color="var(--primary)" lightBg="var(--primary-light)" value={report?.current_weight || user?.weight || '--'} unit="kg" />
-            </div>
-          </section>
-
-          {/* Today's Workouts List */}
-          <section style={{ marginTop: 24 }}>
-            <h2 className="heading-lg" style={{ marginBottom: 16 }}>Today's Plan</h2>
-            <div className="card">
-              <div className="flex-col gap-3">
-                <WorkoutRow title="Full Body Stretching" type="Yoga" time="45 mins" instructor="Zaina Riddle" imgSrc="/images/3d_yoga.png" />
-                <WorkoutRow title="High Intensity Interval" type="CrossFit" time="30 mins" instructor="Lilian Hanson" imgSrc="/images/3d_dumbbell.png" />
-              </div>
-            </div>
-          </section>
-
-        </div>
-
-        {/* RIGHT COLUMN */}
-        <div className="flex-col gap-4">
-
-          {/* Statistics Chart */}
-          {report?.data_points?.length > 1 && (
-             <section className="card">
-                <div className="flex-row-between" style={{ marginBottom: 16 }}>
-                  <h2 className="heading-lg">Progress</h2>
-                  <div className="pill mint">Weekly</div>
-                </div>
-                <div style={{ height: 250 }}>
-                   <WeightChart data={report.data_points} />
-                </div>
-             </section>
-          )}
-
-          {/* Calorie Stats */}
-          {todaySummary && (
-            <section className="card">
-               <h2 className="heading-lg" style={{ marginBottom: 16 }}>Daily Intensity</h2>
-               <div className="flex-row-between items-center bg-gray-50 rounded-lg" style={{ padding: '16px', background: '#f8fafc', borderRadius: 16 }}>
-                  <div>
-                    <div className="text-xs text-muted">Consumed Today</div>
-                    <div className="heading-xl" style={{ color: 'var(--primary)' }}>
-                      {todaySummary.daily_total?.calories || 0} <span className="text-muted heading-sm">kcal</span>
-                    </div>
-                  </div>
-                  <div>
-                     <button className="btn-primary" onClick={() => navigate('/diet')}>View Diet</button>
-                  </div>
-               </div>
-            </section>
-          )}
-
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Subcomponents for the dashboard
-function ActivityCard({ title, value, unit, color, lightBg }) {
-  return (
-    <div className="card flex-col items-center justify-center gap-2" style={{ marginBottom: 0, padding: 24, paddingBottom: 32 }}>
-       <div className="pill" style={{ background: color, color: 'white', marginBottom: 16 }}>{title}</div>
-       <div style={{ width: 80, height: 80, borderRadius: '50%', border: `8px solid ${lightBg}`, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-          <div style={{ position: 'absolute', top: -8, left: -8, right: -8, bottom: -8, borderRadius: '50%', border: `8px solid ${color}`, borderTopColor: 'transparent', borderLeftColor: 'transparent', transform: 'rotate(-45deg)' }}></div>
-          <div className="flex-col items-center">
-            <span style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-dark)', lineHeight: 1 }}>{value}</span>
-            {unit && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{unit}</span>}
-          </div>
-       </div>
-    </div>
-  );
-}
-
-function WorkoutRow({ title, type, time, instructor, imgSrc }) {
-  return (
-    <div className="flex-row-between items-center" style={{ padding: '16px', borderBottom: '1px solid #f1f5f9' }}>
-      <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-         <div style={{ width: 64, height: 64, borderRadius: 16, background: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-           <img src={imgSrc} alt={title} className="animated-3d" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-         </div>
-         <div>
-            <div className="heading-md">{title}</div>
-            <div className="text-muted text-xs">Instructor: {instructor}</div>
-         </div>
-      </div>
-      <div className="flex-col gap-1 items-end">
-         <span className="pill primary">{type}</span>
-         <span className="text-xs text-muted">⏱ {time}</span>
-      </div>
-    </div>
-  );
-}
-
-const styles = {
-  gridContainer: {
-    display: 'grid',
-    gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 1fr)',
-    gap: 32,
-    '@media(max-width: 1024px)': {
-       gridTemplateColumns: '1fr',
-    }
-  },
-  activityGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: 16,
+    );
   }
-};
+
+  return (
+    <div className="premium-dashboard min-h-screen">
+      <motion.section
+        className="dashboard-hero reveal-on-scroll"
+        onMouseMove={(event) => {
+          const rect = event.currentTarget.getBoundingClientRect();
+          mouseX.set((event.clientX - rect.left) / rect.width);
+          mouseY.set((event.clientY - rect.top) / rect.height);
+        }}
+      >
+        <div className="athlete-orb" style={{ width: 250, height: 250, background: 'rgba(255,31,61,0.38)', right: '12%', top: '8%' }} />
+        <div className="hero-copy">
+          <p className="page-kicker">Workout Wild & Free inspired</p>
+          <h1 className="font-display neon-text">Forge your strongest week, {user?.username || 'Athlete'}.</h1>
+          <p>
+            Premium training, nutrition, and progress intelligence in one dark-mode fitness OS built for relentless consistency.
+          </p>
+          <div className="hero-actions">
+            <button className="btn-primary" onClick={() => navigate('/workouts')}>
+              Start training <ArrowRight size={18} />
+            </button>
+            <button className="btn-outline" onClick={() => navigate('/diet')}>Tune nutrition</button>
+          </div>
+        </div>
+
+        <motion.div className="athlete-stage" style={{ x: athleteX, y: athleteY }}>
+          <div className="athlete-card premium-panel">
+            <img src="/images/3d_dumbbell.png" alt="Premium dumbbell" />
+            <div>
+              <span>Readiness</span>
+              <strong>94%</strong>
+            </div>
+          </div>
+          <div className="athlete-silhouette">
+            <span className="font-display">WILD</span>
+          </div>
+          <div className="floating-metric premium-panel">
+            <Trophy size={18} />
+            <span>{report?.entries_count || 0} check-ins</span>
+          </div>
+        </motion.div>
+      </motion.section>
+
+      <section className="stat-tilt-grid reveal-on-scroll">
+        {stats.map((stat, index) => (
+          <Tilt key={stat.title} glareEnable glareMaxOpacity={0.18} tiltMaxAngleX={8} tiltMaxAngleY={8} scale={1.02}>
+            <motion.div className="premium-stat-card" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}>
+              <div className="stat-icon" style={{ color: stat.color }}><stat.icon size={24} /></div>
+              <div>
+                <span>{stat.title}</span>
+                <strong><AnimatedNumber value={stat.value} /> {stat.unit}</strong>
+              </div>
+              <ProgressRing value={stat.progress} color={stat.color} />
+            </motion.div>
+          </Tilt>
+        ))}
+      </section>
+
+      <section className="dashboard-grid reveal-on-scroll">
+        <div className="premium-panel dashboard-card-xl">
+          <div className="section-heading">
+            <div>
+              <p className="page-kicker">Performance graph</p>
+              <h2 className="heading-lg">Transformation Velocity</h2>
+            </div>
+            <span className="live-pill"><Zap size={14} /> Live</span>
+          </div>
+          {report?.data_points?.length > 1 ? <WeightChart data={report.data_points} /> : <EmptyState text="Log progress twice to unlock trend charts." />}
+        </div>
+
+        <div className="premium-panel daily-card">
+          <p className="page-kicker">Daily intensity</p>
+          <h2 className="heading-lg">{Math.round(totals.calories || 0)} kcal</h2>
+          <p className="text-muted">Consumed today against your target.</p>
+          <div className="macro-stack">
+            <MacroBar label="Protein" value={totals.protein || 0} max={180} icon={Beef} />
+            <MacroBar label="Carbs" value={totals.carbs || 0} max={260} icon={Zap} />
+            <MacroBar label="Fats" value={totals.fats || 0} max={90} icon={Flame} />
+          </div>
+          <button className="btn-primary" onClick={() => navigate('/diet')}>View Diet</button>
+        </div>
+      </section>
+
+      <section className="premium-panel workout-strip reveal-on-scroll">
+        <div className="section-heading">
+          <div>
+            <p className="page-kicker">Today’s plan</p>
+            <h2 className="heading-lg">Move Like You Mean It</h2>
+          </div>
+          <button className="btn-outline" onClick={() => navigate('/workouts')}>Open Workouts</button>
+        </div>
+        <div className="workout-row-grid">
+          <WorkoutRow title="Full Body Stretching" type="Mobility" time="45 mins" imgSrc="/images/3d_yoga.png" />
+          <WorkoutRow title="High Intensity Interval" type="CrossFit" time="30 mins" imgSrc="/images/3d_dumbbell.png" />
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function AnimatedNumber({ value }) {
+  const [display, setDisplay] = useState(0);
+
+  useEffect(() => {
+    const numeric = Number(value) || 0;
+    let frame;
+    const start = performance.now();
+    const tick = (now) => {
+      const progress = Math.min(1, (now - start) / 900);
+      setDisplay(Math.round(numeric * progress * 10) / 10);
+      if (progress < 1) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [value]);
+
+  return <>{display}</>;
+}
+
+function ProgressRing({ value, color }) {
+  const safeValue = Math.max(0, Math.min(100, value || 0));
+  return (
+    <div className="progress-ring" style={{ background: `conic-gradient(${color} ${safeValue * 3.6}deg, rgba(255,255,255,0.08) 0deg)` }}>
+      <span>{Math.round(safeValue)}%</span>
+    </div>
+  );
+}
+
+function MacroBar({ label, value, max, icon: Icon }) {
+  const pct = Math.min(100, (value / max) * 100);
+  return (
+    <div className="macro-bar">
+      <div><Icon size={16} /><span>{label}</span><strong>{Math.round(value)}g</strong></div>
+      <i><b style={{ width: `${pct}%` }} /></i>
+    </div>
+  );
+}
+
+function WorkoutRow({ title, type, time, imgSrc }) {
+  return (
+    <Tilt tiltMaxAngleX={6} tiltMaxAngleY={6} scale={1.01}>
+      <div className="premium-workout-row">
+        <img src={imgSrc} alt={title} />
+        <div>
+          <strong>{title}</strong>
+          <span>{type} • {time}</span>
+        </div>
+        <ArrowRight size={18} />
+      </div>
+    </Tilt>
+  );
+}
+
+function EmptyState({ text }) {
+  return <div className="empty-premium">{text}</div>;
+}

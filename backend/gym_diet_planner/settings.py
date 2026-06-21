@@ -7,11 +7,22 @@ import os
 from pathlib import Path
 from datetime import timedelta
 
+from decouple import config
+
+try:
+    import dj_database_url
+except ImportError:
+    dj_database_url = None
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-key-change-in-production-xyz123')
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+def config_bool(name, default=False):
+    value = str(config(name, default=str(default))).strip().lower()
+    return value in ('1', 'true', 'yes', 'on')
+
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key-change-in-production-xyz123')
+DEBUG = config_bool('DEBUG', default=True)
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -34,6 +45,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -63,24 +75,37 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'gym_diet_planner.wsgi.application'
 
-# PostgreSQL Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME', 'GYM-Planner'),
-        'USER': os.environ.get('DB_USER', 'postgres'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', 'jems12'),
-        'HOST': os.environ.get('DB_HOST', 'localhost'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
-    }
-}
 
-# Use SQLite for easy local dev if USE_SQLITE=True
-if os.environ.get('USE_SQLITE', 'True') == 'True':
+
+
+# Use SQLite for easy local dev if USE_SQLITE=True.
+USE_SQLITE = config_bool('USE_SQLITE', default=True)
+DATABASE_URL = config('DATABASE_URL', default='')
+
+if USE_SQLITE:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+elif DATABASE_URL and dj_database_url:
+    DATABASES = {
+        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+    }
+elif DATABASE_URL:
+    raise ImportError(
+        'dj-database-url is required when USE_SQLITE=False and DATABASE_URL is set.'
+    )
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': config('DB_NAME', default='gym_diet_planner'),
+            'USER': config('DB_USER', default='postgres'),
+            'PASSWORD': config('DB_PASSWORD', default=''),
+            'HOST': config('DB_HOST', default='localhost'),
+            'PORT': config('DB_PORT', default='5432'),
         }
     }
 
@@ -130,6 +155,10 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
 ]
+
+frontend_url = config('FRONTEND_URL', default='')
+if frontend_url:
+    CORS_ALLOWED_ORIGINS.append(frontend_url)
 CORS_ALLOW_CREDENTIALS = True
 
 SWAGGER_SETTINGS = {

@@ -7,6 +7,7 @@ import Badge from '../components/ui/Badge';
 import Modal from '../components/ui/Modal';
 import Input, { Select } from '../components/ui/Input';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import EmptyState from '../components/ui/EmptyState';
 import { MacroDonut } from '../components/charts/ProgressChart';
 import { formatDate } from '../utils/helpers';
 import { SunIcon, MoonIcon, FireIcon, SparklesIcon, HeartIcon } from '@heroicons/react/24/solid';
@@ -104,7 +105,7 @@ export default function DietPage() {
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
           <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)}
-            style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: 10, padding: '8px 14px', color: 'var(--text-dark)', fontSize: 14 }} />
+            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid var(--glass-border)', borderRadius: 999, padding: '10px 14px', color: 'var(--text-dark)', fontSize: 14 }} />
           <Button variant="secondary" onClick={() => setShowAddModal(true)}>+ Add Meal</Button>
           <Button onClick={handleGenerate} loading={generating}><SparklesIcon style={{ width: 18, height: 18, marginRight: 4 }} /> Auto-Plan</Button>
         </div>
@@ -129,8 +130,8 @@ export default function DietPage() {
                 </div>
                 {goal && (
                   <div style={{ marginTop: 8 }}>
-                    <div style={styles.calBar}>
-                      <div style={{ ...styles.calFill, width: `${Math.min(100, ((totals.calories || 0) / goal) * 100)}%`, background: (totals.calories || 0) > goal ? '#ef4444' : '#38bdf8' }} />
+                    <div className="bg-surface-alt min-h-2 rounded-full" style={styles.calBar}>
+                      <div style={{ ...styles.calFill, width: `${Math.min(100, ((totals.calories || 0) / goal) * 100)}%` }} />
                     </div>
                     <div style={{ color: (summary?.remaining || 0) >= 0 ? '#10b981' : '#ef4444', fontSize: 13, marginTop: 4 }}>
                       {(summary?.remaining || 0) >= 0 ? `${summary?.remaining} kcal remaining` : `${Math.abs(summary?.remaining)} kcal over target`}
@@ -146,13 +147,11 @@ export default function DietPage() {
 
           {/* Meals list */}
           {!summary?.meals?.length ? (
-            <div style={styles.empty}>
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <HeartIcon style={{ width: 64, height: 64, color: 'var(--primary-light)' }} />
-              </div>
-              <p style={{ color: 'var(--text-muted)', fontSize: 16, marginTop: 12 }}>No meals logged for this day.</p>
-              <Button onClick={() => setShowAddModal(true)} style={{ marginTop: 16 }}>+ Add Your First Meal</Button>
-            </div>
+            <EmptyState
+              icon={<HeartIcon style={{ width: 64, height: 64 }} />}
+              title="No meals logged for this day."
+              action={<Button onClick={() => setShowAddModal(true)}>+ Add Your First Meal</Button>}
+            />
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {['breakfast', 'lunch', 'dinner', 'snack'].map((mealType) => {
@@ -198,7 +197,7 @@ export default function DietPage() {
             <label style={{ color: '#94a3b8', fontSize: 13, fontWeight: 500, display: 'block', marginBottom: 6 }}>Search Food</label>
             <input placeholder="e.g. chicken, rice, apple…" value={foodSearch}
               onChange={(e) => setFoodSearch(e.target.value)}
-              style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: 10, padding: '10px 14px', color: 'var(--text-dark)', fontSize: 14, width: '100%', boxSizing: 'border-box' }} />
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid var(--glass-border)', borderRadius: 14, padding: '10px 14px', color: 'var(--text-dark)', fontSize: 14, width: '100%', boxSizing: 'border-box' }} />
             {foods.length > 0 && (
               <div style={styles.foodDropdown}>
                 {foods.slice(0, 8).map((food) => (
@@ -235,7 +234,7 @@ export default function DietPage() {
 
 export function MealCard({ meal, onDelete }) {
   return (
-    <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14, padding: '14px 16px', boxShadow: 'var(--shadow-sm)' }}>
+    <div style={{ background: 'var(--bg-card)', border: '1px solid var(--glass-border)', borderRadius: 18, padding: '14px 16px', boxShadow: 'var(--shadow-sm)', backdropFilter: 'blur(18px)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
         <span style={{ color: 'var(--text-dark)', fontWeight: 600, fontSize: 15 }}>{meal.name}</span>
         <button onClick={() => onDelete(meal.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: 14 }}>✕</button>
@@ -258,17 +257,16 @@ export function MealCard({ meal, onDelete }) {
 }
 
 const styles = {
-  page: { maxWidth: 1100, margin: '0 auto', padding: '2rem 1.5rem' },
+  page: { maxWidth: 1180, margin: '0 auto', padding: '0' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', flexWrap: 'wrap', gap: 12 },
-  title: { color: 'var(--text-dark)', fontSize: 26, fontWeight: 800, margin: '0 0 4px' },
+  title: { color: 'var(--text-dark)', fontSize: 46, fontFamily: "'Bebas Neue', Impact, sans-serif", letterSpacing: '0.04em', fontWeight: 400, margin: '0 0 4px' },
   sub: { color: 'var(--text-muted)', fontSize: 15, margin: 0 },
   summaryTop: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 24 },
-  calBar: { height: 8, background: '#e2e8f0', borderRadius: 4, overflow: 'hidden', marginTop: 6 },
-  calFill: { height: '100%', borderRadius: 4, transition: 'width 0.5s ease' },
-  empty: { textAlign: 'center', padding: '4rem 2rem' },
+  calBar: { height: 9, background: 'var(--surface-alt)', borderRadius: 999, overflow: 'hidden', marginTop: 6 },
+  calFill: { height: '100%', borderRadius: 999, transition: 'width 0.5s ease', background: 'var(--primary)' },
   mealTypeHeader: { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 },
   mealTypeTitle: { color: 'var(--text-dark)', fontSize: 16, fontWeight: 700, margin: 0, flex: 1 },
-  foodDropdown: { marginTop: 8, background: '#fff', border: '1px solid #e2e8f0', borderRadius: 10, overflow: 'hidden', maxHeight: 220, overflowY: 'auto' },
-  foodItem: { padding: '10px 14px', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 2, borderBottom: '1px solid #f8fafc' },
+  foodDropdown: { marginTop: 8, background: '#121216', border: '1px solid var(--glass-border)', borderRadius: 14, overflow: 'hidden', maxHeight: 220, overflowY: 'auto' },
+  foodItem: { padding: '10px 14px', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 2, borderBottom: '1px solid var(--glass-border)' },
   selectedFood: { background: 'var(--primary-light)', border: '1px solid var(--primary)', borderRadius: 12, padding: '14px' },
 };

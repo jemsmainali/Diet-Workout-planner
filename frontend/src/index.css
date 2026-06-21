@@ -1,34 +1,37 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@tailwind utilities;
 
 :root {
-  /* Colors */
-  --bg-main: #f4f7fb;
-  --bg-card: #ffffff;
+  --bg-main: #050506;
+  --bg-card: rgba(18, 18, 22, 0.72);
+  --surface: #121216;
+  --surface-alt: #1b1b21;
   
-  --primary: #38bdf8;
-  --primary-hover: #0ea5e9;
-  --primary-light: #e0f2fe;
-  --primary-gradient: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+  --primary: #ff1f3d;
+  --primary-hover: #ff4b60;
+  --primary-light: rgba(255, 31, 61, 0.14);
+  --primary-gradient: linear-gradient(135deg, #ff1638 0%, #a50016 100%);
   
-  --text-dark: #1e293b;
-  --text-muted: #94a3b8;
+  --text-dark: #f8fafc;
+  --text-muted: #9ca3af;
   
-  --color-purple: #8b5cf6;
-  --color-purple-light: #ede9fe;
-  --color-mint: #14b8a6;
-  --color-mint-light: #ccfbf1;
-  --color-orange: #f97316;
-  --color-orange-light: #ffedd5;
-  --color-blue: #3b82f6;
+  --color-purple: #d946ef;
+  --color-purple-light: rgba(217, 70, 239, 0.16);
+  --color-mint: #22c55e;
+  --color-mint-light: rgba(34, 197, 94, 0.14);
+  --color-orange: #fb923c;
+  --color-orange-light: rgba(251, 146, 60, 0.16);
+  --color-blue: #60a5fa;
 
-  --nav-bg: #ffffff;
-  --nav-active: #0ea5e9;
-  --nav-inactive: #cbd5e1;
+  --nav-bg: rgba(5, 5, 6, 0.82);
+  --nav-active: #ff1f3d;
+  --nav-inactive: #737373;
 
-  --shadow-sm: 0 5px 20px -5px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 12px 30px -8px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.08);
-  --shadow-primary: 0 12px 24px -6px rgba(56, 189, 248, 0.35);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --shadow-sm: 0 20px 60px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 28px 90px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 40px 120px rgba(0, 0, 0, 0.65);
+  --shadow-primary: 0 0 34px rgba(255, 31, 61, 0.35), 0 18px 50px rgba(165, 0, 22, 0.35);
   
   --radius-md: 12px;
   --radius-lg: 24px;
@@ -44,11 +47,15 @@
 }
 
 body {
-  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: var(--bg-main);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(255, 31, 61, 0.18), transparent 32%),
+    radial-gradient(circle at 80% 0%, rgba(255, 255, 255, 0.08), transparent 28%),
+    linear-gradient(135deg, #050506 0%, #0b0b0f 48%, #160006 100%);
   color: var(--text-dark);
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 a {
@@ -62,4 +69,22 @@ button {
   background: none;
   cursor: pointer;
   outline: none;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.75), transparent 75%);
+}
+
+.font-display {
+  font-family: 'Bebas Neue', Impact, sans-serif;
+  letter-spacing: 0.04em;
 }

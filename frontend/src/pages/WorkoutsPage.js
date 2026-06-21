@@ -6,10 +6,12 @@ import Badge from '../components/ui/Badge';
 import Modal from '../components/ui/Modal';
 import Input, { Select } from '../components/ui/Input';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
-import { capitalize, getDayLabel, getWeekDays } from '../utils/helpers';
+import EmptyState from '../components/ui/EmptyState';
+import PlaceholderImage from '../components/ui/PlaceholderImage';
+import { capitalize, getWeekDays } from '../utils/helpers';
+import { Dumbbell, PlusCircle } from 'lucide-react';
 
 const DAY_ORDER = getWeekDays();
-const MUSCLE_GROUPS = ['chest','back','shoulders','biceps','triceps','legs','glutes','abs','cardio','full_body'];
 const MUSCLE_COLORS = { chest:'blue', back:'purple', shoulders:'green', biceps:'yellow', triceps:'red', legs:'blue', glutes:'purple', abs:'green', cardio:'red', full_body:'yellow' };
 
 export default function WorkoutsPage() {
@@ -18,7 +20,6 @@ export default function WorkoutsPage() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [selectedDay, setSelectedDay] = useState('monday');
   const [newPlan, setNewPlan] = useState({ name: '', day: 'monday', notes: '' });
   const [genMsg, setGenMsg] = useState('');
   const [activeDay, setActiveDay] = useState('monday');
@@ -99,7 +100,8 @@ export default function WorkoutsPage() {
           return (
             <button key={day} onClick={() => setActiveDay(day)} style={{ ...styles.dayTab, ...(activeDay === day ? styles.dayTabActive : {}) }}>
               <span>{capitalize(day.slice(0, 3))}</span>
-              {count > 0 && <span style={{ background: '#38bdf8', color: '#0f172a', borderRadius: 10, padding: '1px 6px', fontSize: 11, fontWeight: 700 }}>{count}</span>}
+              {count > 0 && <span style={styles.dayBadge}>{count}</span>}
+              {day === 'sunday' && count === 0 && <span style={styles.restBadge}>Rest</span>}
             </button>
           );
         })}
@@ -107,12 +109,13 @@ export default function WorkoutsPage() {
 
       {/* Plans for selected day */}
       {plansForDay.length === 0 ? (
-        <div style={styles.empty}>
-          <p style={{ color: 'var(--text-dark)', fontSize: 16, fontWeight: 600 }}>No workout planned for {capitalize(activeDay)}.</p>
-          <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Add a plan or auto-generate your weekly schedule.</p>
-        </div>
+        <EmptyState
+          icon={<Dumbbell size={64} />}
+          title={`No workout planned for ${capitalize(activeDay)}. Add a plan or auto-generate your weekly schedule.`}
+          action={<Button variant="secondary" onClick={() => setShowAddModal(true)}>+ Add Plan</Button>}
+        />
       ) : (
-        <div style={styles.plansGrid}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4" style={styles.plansGrid}>
           {plansForDay.map((plan) => (
             <Card key={plan.id} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div style={styles.planHeader}>
@@ -142,6 +145,14 @@ export default function WorkoutsPage() {
               {plan.notes && <p style={{ color: 'var(--text-muted)', fontSize: 13, fontStyle: 'italic', margin: 0 }}>{plan.notes}</p>}
             </Card>
           ))}
+          <Card style={styles.addExerciseCard}>
+            <div style={styles.addExerciseIcon}><PlusCircle size={28} /></div>
+            <h3 style={styles.planName}>Add Exercise</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: '6px 0 14px' }}>
+              Build out this training day with another focused movement.
+            </p>
+            <Button variant="secondary" onClick={() => setShowAddModal(true)}>+ Add Plan</Button>
+          </Card>
         </div>
       )}
 
@@ -151,8 +162,16 @@ export default function WorkoutsPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12 }}>
           {exercises.slice(0, 12).map((ex) => (
             <div key={ex.id} style={styles.exCard}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div style={{ color: 'var(--text-dark)', fontWeight: 600, fontSize: 14 }}>{ex.name}</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <PlaceholderImage
+                    alt={`${ex.name} placeholder`}
+                    className="w-12 h-12 rounded bg-surface-alt"
+                    dataSlot={`exercise-${ex.muscle_group || 'library'}`}
+                    fallbackIcon={<Dumbbell size={20} />}
+                  />
+                  <div style={{ color: 'var(--text-dark)', fontWeight: 600, fontSize: 14 }}>{ex.name}</div>
+                </div>
                 <Badge color={MUSCLE_COLORS[ex.muscle_group] || 'gray'}>{capitalize(ex.muscle_group)}</Badge>
               </div>
               <div style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: 6 }}>{ex.description}</div>
@@ -181,19 +200,22 @@ export default function WorkoutsPage() {
 }
 
 const styles = {
-  page: { maxWidth: 1400, margin: '0 auto', padding: '2rem 1.5rem' },
+  page: { maxWidth: 1400, margin: '0 auto', padding: '0' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', flexWrap: 'wrap', gap: 12 },
-  title: { color: 'var(--text-dark)', fontSize: 26, fontWeight: 800, margin: '0 0 4px' },
+  title: { color: 'var(--text-dark)', fontSize: 46, fontFamily: "'Bebas Neue', Impact, sans-serif", letterSpacing: '0.04em', fontWeight: 400, margin: '0 0 4px' },
   sub: { color: 'var(--text-muted)', fontSize: 15, margin: 0 },
   dayTabs: { display: 'flex', gap: 8, marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: 4 },
-  dayTab: { padding: '8px 16px', borderRadius: 10, border: '1px solid #e2e8f0', background: '#fff', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 14, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap', transition: 'all 0.15s' },
-  dayTabActive: { background: 'var(--primary-light)', color: 'var(--primary)', border: '1px solid var(--primary)' },
-  empty: { textAlign: 'center', padding: '4rem 2rem' },
-  plansGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16 },
+  dayTab: { padding: '10px 16px', borderRadius: 999, border: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.06)', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 13, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap', transition: 'all 0.15s' },
+  dayTabActive: { background: 'var(--primary-light)', color: '#fff', border: '1px solid rgba(255,31,61,0.5)', boxShadow: 'var(--shadow-primary)' },
+  dayBadge: { background: 'var(--primary)', color: '#fff', borderRadius: 10, padding: '1px 6px', fontSize: 11, fontWeight: 700 },
+  restBadge: { background: 'rgba(255,255,255,0.08)', color: 'var(--text-muted)', borderRadius: 10, padding: '1px 6px', fontSize: 11, fontWeight: 700 },
+  plansGrid: {},
+  addExerciseCard: { minHeight: 180, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start' },
+  addExerciseIcon: { width: 52, height: 52, borderRadius: 16, background: 'var(--primary-light)', color: 'var(--primary)', display: 'grid', placeItems: 'center', marginBottom: 12 },
   planHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' },
   planName: { color: 'var(--text-dark)', fontSize: 16, fontWeight: 700, margin: 0 },
   deleteBtn: { background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, opacity: 0.5, color: '#ef4444' },
-  exerciseRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', borderRadius: 10, padding: '10px 12px' },
+  exerciseRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.055)', border: '1px solid var(--glass-border)', borderRadius: 14, padding: '10px 12px' },
   sectionTitle: { color: 'var(--text-dark)', fontSize: 18, fontWeight: 700, margin: '0 0 1rem' },
-  exCard: { background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14, padding: '14px 16px', boxShadow: 'var(--shadow-sm)' },
+  exCard: { background: 'var(--bg-card)', border: '1px solid var(--glass-border)', borderRadius: 18, padding: '14px 16px', boxShadow: 'var(--shadow-sm)', backdropFilter: 'blur(18px)' },
 };

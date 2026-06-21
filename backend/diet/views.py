@@ -30,6 +30,8 @@ class DietPlanListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return DietPlan.objects.none()
         qs = DietPlan.objects.filter(user=self.request.user)
         date = self.request.query_params.get('date')
         if date:
@@ -56,6 +58,8 @@ class DietPlanDetailView(generics.RetrieveUpdateDestroyAPIView):
         return DietPlanSerializer
 
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return DietPlan.objects.none()
         return DietPlan.objects.filter(user=self.request.user)
 
 

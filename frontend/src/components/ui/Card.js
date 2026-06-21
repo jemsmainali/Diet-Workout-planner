@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function Card({ children, style = {}, className = '' }) {
   return (
-    <div style={{ background: 'var(--bg-card)', borderRadius: 16, border: '1px solid #e2e8f0', padding: '1.5rem', boxShadow: 'var(--shadow-sm)', ...style }} className={className}>
+    <div style={{ background: 'var(--bg-card)', borderRadius: 24, border: '1px solid var(--glass-border)', padding: '1.5rem', boxShadow: 'var(--shadow-sm)', backdropFilter: 'blur(22px)', WebkitBackdropFilter: 'blur(22px)', ...style }} className={className}>
       {children}
     </div>
   );
@@ -10,8 +10,8 @@ export default function Card({ children, style = {}, className = '' }) {
 
 export function StatCard({ icon, label, value, sub, color = 'var(--primary)' }) {
   return (
-    <div style={{ background: 'var(--bg-card)', border: '1px solid #e2e8f0', borderRadius: 16, padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', gap: 16, boxShadow: 'var(--shadow-sm)' }}>
-      <div style={{ width: 52, height: 52, borderRadius: 14, background: `${color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, flexShrink: 0 }}>
+    <div style={{ background: 'var(--bg-card)', border: '1px solid var(--glass-border)', borderRadius: 20, padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', gap: 16, boxShadow: 'var(--shadow-sm)', backdropFilter: 'blur(18px)' }}>
+      <div style={{ width: 52, height: 52, borderRadius: 16, background: `${color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, flexShrink: 0 }}>
         {icon}
       </div>
       <div>

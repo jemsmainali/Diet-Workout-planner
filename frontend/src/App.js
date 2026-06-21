@@ -13,6 +13,7 @@ import DietPage from './pages/DietPage';
 import ProgressPage from './pages/ProgressPage';
 import ProfilePage from './pages/ProfilePage';
 
+
 export default function App() {
   return (
     <BrowserRouter>
