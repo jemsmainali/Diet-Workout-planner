@@ -6,6 +6,7 @@ import { ArrowRight, Beef, Dumbbell, Flame, HeartPulse, Trophy, Zap } from 'luci
 import { useAuth } from '../context/AuthContext';
 import { progressAPI, workoutAPI, dietAPI } from '../services/api';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import ComingSoonModal from '../components/ui/ComingSoonModal';
 import { WeightChart } from '../components/charts/ProgressChart';
 
 export default function DashboardPage() {
@@ -15,10 +16,17 @@ export default function DashboardPage() {
   const [workoutCount, setWorkoutCount] = useState(0);
   const [todaySummary, setTodaySummary] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showComingSoonModal, setShowComingSoonModal] = useState(false);
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const athleteX = useTransform(mouseX, [0, 1], [-22, 22]);
   const athleteY = useTransform(mouseY, [0, 1], [-16, 16]);
+
+  useEffect(() => {
+    if (!localStorage.getItem('seen-powerlifting-announcement')) {
+      setShowComingSoonModal(true);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -38,6 +46,15 @@ export default function DashboardPage() {
     fetchAll();
   }, []);
 
+  const handleCloseComingSoonModal = () => {
+    localStorage.setItem('seen-powerlifting-announcement', 'true');
+    setShowComingSoonModal(false);
+  };
+
+  const comingSoonModal = showComingSoonModal ? (
+    <ComingSoonModal onClose={handleCloseComingSoonModal} />
+  ) : null;
+
   const totals = todaySummary?.daily_total || {};
   const stats = useMemo(() => ([
     { title: 'Training Blocks', value: workoutCount, unit: '', icon: Dumbbell, color: '#ff1f3d', progress: Math.min(92, workoutCount * 14 || 36) },
@@ -47,14 +64,18 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div style={{ display: 'grid', placeItems: 'center', height: '70vh' }}>
-        <LoadingSpinner text="Loading your command center..." />
-      </div>
+      <>
+        {comingSoonModal}
+        <div style={{ display: 'grid', placeItems: 'center', height: '70vh' }}>
+          <LoadingSpinner text="Loading your command center..." />
+        </div>
+      </>
     );
   }
 
   return (
     <div className="premium-dashboard min-h-screen">
+      {comingSoonModal}
       <motion.section
         className="dashboard-hero reveal-on-scroll"
         onMouseMove={(event) => {

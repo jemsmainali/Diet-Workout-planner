@@ -30,6 +30,7 @@ export default function RegisterPage() {
     setError('');
     try {
       await register(form);
+      localStorage.removeItem('seen-powerlifting-announcement');
       navigate('/dashboard');
     } catch (err) {
       const data = err.response?.data;
